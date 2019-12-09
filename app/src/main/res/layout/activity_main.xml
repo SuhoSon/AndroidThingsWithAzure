@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.microsoft.azure.iot.sdk.samples.androidsample.MainActivity">
+
+    <Button
+        android:id="@+id/btnStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="40dp"
+        android:layout_marginStart="40dp"
+        android:onClick="btnStartOnClick"
+        android:text="@string/start" />
+
+    <Button
+        android:id="@+id/btnStop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/btnStart"
+        android:layout_marginEnd="59dp"
+        android:onClick="btnStopOnClick"
+        android:text="@string/stop" />
+
+    <TextView
+        android:id="@+id/txtMsgsReceived"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:text="Messages received:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <TextView
+        android:id="@+id/txtMsgsReceivedVal"
+        android:layout_width="60dp"
+        android:layout_height="25dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignTop="@+id/txtMsgsReceived"
+        android:layout_marginEnd="25dp"
+        android:text="0"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <TextView
+        android:id="@+id/txtLastTemp"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignStart="@+id/txtMsgsReceived"
+        android:layout_below="@+id/txtMsgsReceived"
+        android:text="Last Temp. Reading (C):"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <TextView
+        android:id="@+id/txtLastTempVal"
+        android:layout_width="60dp"
+        android:layout_height="25dp"
+        android:layout_alignStart="@+id/txtMsgsReceivedVal"
+        android:layout_below="@+id/txtMsgsReceivedVal"
+        android:text="0"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@android:color/holo_blue_dark" />
+
+    <TextView
+        android:id="@+id/txtLastMsgReceived"
+        android:layout_width="wrap_content"
+        android:layout_height="25dp"
+        android:layout_alignStart="@+id/txtMsgsReceived"
+        android:layout_below="@+id/txtLastTemp"
+        android:text="Last Message received:"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
+
+    <TextView
+        android:id="@+id/txtLastMsgReceivedVal"
+        android:layout_width="316dp"
+        android:layout_height="60dp"
+        android:layout_alignStart="@+id/txtMsgsReceived"
+        android:layout_below="@+id/txtLastMsgReceived"
+        android:gravity="center_vertical"
+        android:text="{none}"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@android:color/holo_blue_dark"
+        android:maxLines="1"
+        android:autoSizeTextType="uniform"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeMaxTextSize="14sp"
+        android:autoSizeStepGranularity="2sp"/>
+
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignStart="@+id/txtMsgsReceived"
+        android:layout_below="@+id/txtLastMsgReceivedVal"
+        android:layout_marginBottom="100dp"/>
+
+
+</RelativeLayout>
