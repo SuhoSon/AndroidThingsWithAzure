@@ -30,6 +30,15 @@
         android:onClick="btnStopOnClick"
         android:text="@string/stop" />
 
+    <Button
+        android:id="@+id/btnInvoke"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/txtLastMsgReceivedVal"
+        android:layout_alignParentEnd="true"
+        android:onClick="btnInvokeOnClick"
+        android:text="@string/invoke" />
+
     <TextView
         android:id="@+id/txtMsgsReceived"
         android:layout_width="wrap_content"
@@ -79,9 +88,20 @@
         android:text="Last Message received:"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
+    <EditText
+        android:id="@+id/txtLastInterval"
+        android:layout_width="60dp"
+        android:layout_height="40dp"
+        android:layout_below="@+id/txtLastTempVal"
+        android:layout_alignStart="@+id/txtMsgsReceivedVal"
+        android:text="5000"
+        android:textAlignment="center"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        android:textColor="@android:color/holo_blue_dark" />
+
     <TextView
         android:id="@+id/txtLastMsgReceivedVal"
-        android:layout_width="316dp"
+        android:layout_width="250dp"
         android:layout_height="60dp"
         android:layout_alignStart="@+id/txtMsgsReceived"
         android:layout_below="@+id/txtLastMsgReceived"

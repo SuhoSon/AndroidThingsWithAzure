@@ -6,6 +6,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.github.mikephil.charting.charts.LineChart;
@@ -20,37 +21,46 @@ import com.microsoft.azure.eventhubs.EventHubRuntimeInformation;
 import com.microsoft.azure.eventhubs.EventPosition;
 import com.microsoft.azure.eventhubs.PartitionReceiver;
 import com.microsoft.azure.sdk.iot.device.Message;
+import com.microsoft.azure.sdk.iot.service.devicetwin.DeviceMethod;
+import com.microsoft.azure.sdk.iot.service.devicetwin.MethodResult;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String connString = BuildConfig.DeviceConnectionString;
     private static final String eventHubsCompatibleEndpoint = BuildConfig.HubEndpointString;
     private static final String eventHubsCompatiblePath = BuildConfig.HubPathString;
     private static final String iotHubSasKey = BuildConfig.SasKeyString;
     private static final String iotHubSasKeyName = BuildConfig.SasKeyNameString;
+
     private static ArrayList<PartitionReceiver> receivers = new ArrayList<>();
     private final Handler handler = new Handler();
+
     Button btnStart;
     Button btnStop;
+    private static final Long responseTimeout = TimeUnit.SECONDS.toSeconds(200);
+
     TextView txtLastTempVal;
     TextView txtLastMsgReceivedVal;
+    private static final Long connectTimeout = TimeUnit.SECONDS.toSeconds(5);
     LineChart lineChart;
-    ArrayList<Entry> entries = new ArrayList<>();
-    ArrayList<String> labels = new ArrayList<>();
-    DateTimeFormatter formatter;
-    private String lastException;
+    Button btnInvoke;
     final Runnable exceptionRunnable = new Runnable() {
         public void run() {
             AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
@@ -59,8 +69,18 @@ public class MainActivity extends AppCompatActivity {
             System.out.println(lastException);
             btnStart.setEnabled(true);
             btnStop.setEnabled(false);
+            btnInvoke.setEnabled(false);
         }
     };
+    EditText txtLastInterval;
+
+    ArrayList<Entry> entries = new ArrayList<>();
+    ArrayList<String> labels = new ArrayList<>();
+    DateTimeFormatter formatter;
+
+    private String lastException;
+    DeviceMethod methodClient;
+
     private ScheduledExecutorService executorService;
     private EventHubClient ehClient;
     private EventHubRuntimeInformation eventHubInfo;
@@ -74,9 +94,11 @@ public class MainActivity extends AppCompatActivity {
 
         btnStart = findViewById(R.id.btnStart);
         btnStop = findViewById(R.id.btnStop);
+        btnInvoke = findViewById(R.id.btnInvoke);
 
         txtLastTempVal = findViewById(R.id.txtLastTempVal);
         txtLastMsgReceivedVal = findViewById(R.id.txtLastMsgReceivedVal);
+        txtLastInterval = findViewById(R.id.txtLastInterval);
 
         lineChart = findViewById(R.id.chart);
 
@@ -104,6 +126,7 @@ public class MainActivity extends AppCompatActivity {
         stop();
 
         btnStart.setEnabled(true);
+        btnInvoke.setEnabled(false);
         btnStop.setEnabled(false);
     }
 
@@ -128,6 +151,42 @@ public class MainActivity extends AppCompatActivity {
         start();
 
         btnStart.setEnabled(false);
+        btnInvoke.setEnabled(true);
+        btnStop.setEnabled(true);
+    }
+
+    private void invoke() {
+        new Thread(new Runnable() {
+            public void run() {
+                MethodResult result;
+                Map<String, Object> payload = new HashMap<String, Object>() {
+                    {
+                        put("sendInterval", txtLastInterval.getText().toString());
+                    }
+                };
+
+                try {
+                    methodClient = DeviceMethod.createFromConnectionString(connString);
+                    result = methodClient.invoke("MyAndroidThingsDevice", "setSendMessagesInterval", responseTimeout, connectTimeout, payload);
+
+                    if (result == null) {
+                        throw new IOException("Method invoke returns null");
+                    } else {
+                        // Sending success
+                    }
+                } catch (Exception e) {
+                    lastException = "Exception while trying to invoke direct method: " + e.toString();
+                    handler.post(exceptionRunnable);
+                }
+            }
+        }).start();
+    }
+
+    public void btnInvokeOnClick(View v) {
+        invoke();
+
+        btnStart.setEnabled(false);
+        btnInvoke.setEnabled(true);
         btnStop.setEnabled(true);
     }
 
@@ -185,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                             txtLastTempVal.setText(String.valueOf(cpuTemperature));
                             txtLastMsgReceivedVal.setText("[" + new String(receivedEvent.getBytes(), Message.DEFAULT_IOTHUB_MESSAGE_CHARSET) + "]");
 
-                            drawGraph();
+                            drawChart();
                         }
                     }
                 } catch (JSONException e) {
@@ -198,7 +257,7 @@ public class MainActivity extends AppCompatActivity {
         }, executorService);
     }
 
-    private void drawGraph() {
+    private void drawChart() {
         new Thread(() -> {
             LineDataSet dataset = new LineDataSet(entries, "CPU Temperature");
             dataset.setLineWidth(5);
