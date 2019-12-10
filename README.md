@@ -31,10 +31,6 @@ https://partner.android.com/things/console
 
 # Raspberry Pi 3 WiFi connect
 
-am startservice \
--n com.google.wifisetup/.WifiSetupService \
--a WifiSetupService.Connect \
--e ssid {WiFi ID} \
--e passphrase {WiFi password}
+am startservice -n com.google.wifisetup/.WifiSetupService -a WifiSetupService.Connect -e ssid {WiFi ID} -e passphrase {WiFi password}
 
 logcat –d | grep WifiConfigurator 
