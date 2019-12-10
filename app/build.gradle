@@ -2,6 +2,10 @@ apply plugin: 'com.android.application'
 
 //***********************************************************************************************//
 def IOTHUB_DEVICE_CONNECTION_STRING_ENV_VAR_NAME = project.hasProperty('DeviceConnectionString') ? '"'+project.property('DeviceConnectionString')+'"' : '"Define Device Connection"'
+def IOTHUB_ENDPOINT_ENV_VAR_NAME = project.hasProperty('HubEndpointString') ? '"'+project.property('HubEndpointString')+'"' : '"Define Hub Endpoint"'
+def IOTHUB_PATH_ENV_VAR_NAME = project.hasProperty('HubPathString') ? '"'+project.property('HubPathString')+'"' : '"Define Hub Path"'
+def IOTHUB_SASKEY_ENV_VAR_NAME = project.hasProperty('SasKeyString') ? '"'+project.property('SasKeyString')+'"' : '"Define Hub Sassion Key"'
+def IOTHUB_SASKEYNAME_ENV_VAR_NAME = project.hasProperty('SasKeyNameString') ? '"'+project.property('SasKeyNameString')+'"' : '"Define Hub Sassion Key Name"'
 def STRING='String'
 //***********************************************************************************************//
 
@@ -9,7 +13,7 @@ android {
     compileSdkVersion 28
 
     defaultConfig {
-        applicationId "com.iothub.azure.microsoft.com.androidsample"
+        applicationId "univ.pnu.androidthings.test"
         minSdkVersion 26
         targetSdkVersion 28
         multiDexEnabled true
@@ -18,8 +22,13 @@ android {
         each {
             //buildTypes.mBuildConfigFields 'DATATYPE','VARIABLE',|"GRADLE VARIABLE|"'
             buildConfigField STRING, 'DeviceConnectionString', IOTHUB_DEVICE_CONNECTION_STRING_ENV_VAR_NAME
+            buildConfigField STRING, 'HubEndpointString', IOTHUB_ENDPOINT_ENV_VAR_NAME
+            buildConfigField STRING, 'HubPathString', IOTHUB_PATH_ENV_VAR_NAME
+            buildConfigField STRING, 'SasKeyString', IOTHUB_SASKEY_ENV_VAR_NAME
+            buildConfigField STRING, 'SasKeyNameString', IOTHUB_SASKEYNAME_ENV_VAR_NAME
         }
     }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -37,9 +46,10 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'thirdpartynotice.txt'
     }
+
     compileOptions {
-        sourceCompatibility = 1.8
-        targetCompatibility = 1.8
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 
@@ -49,7 +59,7 @@ dependencies {
     implementation 'com.android.support:multidex:1.0.3'
 
     implementation ('com.microsoft.azure:azure-eventhubs:1.3.0')
-    implementation ('com.microsoft.azure.sdk.iot:iot-device-client:1.14.2'){
+    implementation ('com.microsoft.azure.sdk.iot:iot-device-client:1.19.0'){
         exclude module: 'azure-storage'
     }
     implementation ('com.microsoft.azure.android:azure-storage-android:2.0.0@aar')

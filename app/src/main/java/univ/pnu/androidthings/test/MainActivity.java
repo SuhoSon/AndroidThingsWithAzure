@@ -1,4 +1,4 @@
-package com.microsoft.azure.iot.sdk.samples.androidsample;
+package univ.pnu.androidthings.test;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,38 +36,39 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class MainActivity extends AppCompatActivity {
 
-    private static final String eventHubsCompatibleEndpoint = "sb://ihsuprodseres016dednamespace.servicebus.windows.net/";
-    private static final String eventHubsCompatiblePath = "iothub-ehub-iot-hub-os-2597440-a89dc3dcb6";
-    private static final String iotHubSasKey = "dmSUyReW+BGnlK/24oz7gu48+PatsuxN5Vqo/H8ND4g=";
-    private static final String iotHubSasKeyName = "service";
-
-    private String lastException;
-
+    private static final String eventHubsCompatibleEndpoint = BuildConfig.HubEndpointString;
+    private static final String eventHubsCompatiblePath = BuildConfig.HubPathString;
+    private static final String iotHubSasKey = BuildConfig.SasKeyString;
+    private static final String iotHubSasKeyName = BuildConfig.SasKeyNameString;
+    private static ArrayList<PartitionReceiver> receivers = new ArrayList<>();
+    private final Handler handler = new Handler();
     Button btnStart;
     Button btnStop;
-
     TextView txtLastTempVal;
     TextView txtLastMsgReceivedVal;
-
     LineChart lineChart;
     ArrayList<Entry> entries = new ArrayList<>();
     ArrayList<String> labels = new ArrayList<>();
-
     DateTimeFormatter formatter;
-
+    private String lastException;
+    final Runnable exceptionRunnable = new Runnable() {
+        public void run() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+            builder.setMessage(lastException);
+            builder.show();
+            System.out.println(lastException);
+            btnStart.setEnabled(true);
+            btnStop.setEnabled(false);
+        }
+    };
     private ScheduledExecutorService executorService;
     private EventHubClient ehClient;
     private EventHubRuntimeInformation eventHubInfo;
-
     private int msgReceivedCount = 0;
-    private static ArrayList<PartitionReceiver> receivers = new ArrayList<>();
-
-    private final Handler handler = new Handler();
     private Thread sendThread;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -82,11 +83,9 @@ public class MainActivity extends AppCompatActivity {
         btnStop.setEnabled(false);
     }
 
-    private void stop()
-    {
+    private void stop() {
         new Thread(() -> {
-            try
-            {
+            try {
                 System.out.println("Shutting down...");
                 sendThread.interrupt();
                 for (PartitionReceiver receiver : receivers) {
@@ -94,36 +93,29 @@ public class MainActivity extends AppCompatActivity {
                 }
                 ehClient.closeSync();
                 executorService.shutdown();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 lastException = "Exception while closing IoTHub connection: " + e;
                 handler.post(exceptionRunnable);
             }
         }).start();
     }
 
-    public void btnStopOnClick(View v)
-    {
+    public void btnStopOnClick(View v) {
         stop();
 
         btnStart.setEnabled(true);
         btnStop.setEnabled(false);
     }
 
-    private void start()
-    {
+    private void start() {
         formatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-                .withLocale( Locale.KOREA )
-                .withZone( ZoneId.systemDefault() );
+                .withLocale(Locale.KOREA)
+                .withZone(ZoneId.systemDefault());
 
         sendThread = new Thread(() -> {
-            try
-            {
+            try {
                 initClient();
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 lastException = "Exception while opening IoTHub connection: " + e;
                 handler.post(exceptionRunnable);
             }
@@ -132,24 +124,12 @@ public class MainActivity extends AppCompatActivity {
         sendThread.start();
     }
 
-    public void btnStartOnClick(View v)
-    {
+    public void btnStartOnClick(View v) {
         start();
 
         btnStart.setEnabled(false);
         btnStop.setEnabled(true);
     }
-
-    final Runnable exceptionRunnable = new Runnable() {
-        public void run() {
-            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-            builder.setMessage(lastException);
-            builder.show();
-            System.out.println(lastException);
-            btnStart.setEnabled(true);
-            btnStop.setEnabled(false);
-        }
-    };
 
     private void initClient() throws Exception {
         final ConnectionStringBuilder connStr = new ConnectionStringBuilder()
