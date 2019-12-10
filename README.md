@@ -17,7 +17,14 @@ https://portal.azure.com/#home
 
 az extension add –name azure-cli-iot-ext az iot hub device-identity create –hub-name {YourIoTHubName} --device-id MyAndroidThingsDevice
 
+## DeviceString
 az iot hub device-identity show-connection-string --hub-name {YourIoTHubName} --device-id MyAndroidThingsDevice --output table
+## HubEndPointString
+az iot hub show --query properties.eventHubEndpoints.events.endpoint --name {YourIoTHubName}
+## HubPathString
+az iot hub show --query properties.eventHubEndpoints.events.path --name {YourIoTHubName}
+## HubSasKeyString
+az iot hub policy show --name service --query primaryKey --hub-name {YourIoTHubName}
 
 # Android Things Console
 https://partner.android.com/things/console
